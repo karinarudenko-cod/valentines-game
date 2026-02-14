@@ -1,0 +1,392 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Игра для влюблённых ❤️</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Georgia', serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+            overflow-x: hidden;
+        }
+
+        .container {
+            max-width: 500px;
+            width: 100%;
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 30px;
+            color: white;
+        }
+
+        .header h1 {
+            font-size: 2em;
+            margin-bottom: 10px;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+        }
+
+        .header p {
+            font-size: 1em;
+            opacity: 0.9;
+        }
+
+        .wheel-container {
+            position: relative;
+            width: 280px;
+            height: 280px;
+            margin: 0 auto 40px;
+        }
+
+        .wheel {
+            width: 100%;
+            height: 100%;
+            border-radius: 50%;
+            background: linear-gradient(45deg, #ff6b9d, #c06c84);
+            box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+            transition: transform 3s cubic-bezier(0.17, 0.67, 0.12, 0.99);
+        }
+
+        .wheel.spinning {
+            animation: spin 3s cubic-bezier(0.17, 0.67, 0.12, 0.99);
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(1800deg); }
+        }
+
+        .wheel-center {
+            background: white;
+            width: 120px;
+            height: 120px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 3em;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+        }
+
+        .arrow {
+            position: absolute;
+            top: -20px;
+            left: 50%;
+            transform: translateX(-50%);
+            font-size: 3em;
+            filter: drop-shadow(0 3px 5px rgba(0,0,0,0.3));
+        }
+
+        .spin-button {
+            display: block;
+            margin: 0 auto 30px;
+            padding: 18px 50px;
+            font-size: 1.2em;
+            font-weight: bold;
+            color: white;
+            background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+            border: none;
+            border-radius: 50px;
+            cursor: pointer;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.3);
+            transition: all 0.3s ease;
+            font-family: 'Georgia', serif;
+        }
+
+        .spin-button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 7px 20px rgba(0,0,0,0.4);
+        }
+
+        .spin-button:active {
+            transform: translateY(0);
+        }
+
+        .spin-button:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+        }
+
+        .question-card {
+            background: white;
+            border-radius: 20px;
+            padding: 30px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+            text-align: center;
+            display: none;
+            animation: fadeIn 0.5s ease;
+        }
+
+        .question-card.active {
+            display: block;
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .question-number {
+            color: #764ba2;
+            font-size: 0.9em;
+            margin-bottom: 20px;
+            font-weight: bold;
+        }
+
+        .question-text {
+            font-size: 1.3em;
+            line-height: 1.6;
+            color: #333;
+            margin-bottom: 25px;
+            font-weight: 500;
+        }
+
+        .turn-indicator {
+            margin-top: 20px;
+            padding: 15px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border-radius: 10px;
+            font-size: 1.1em;
+            font-weight: bold;
+        }
+
+        .controls {
+            display: flex;
+            gap: 15px;
+            margin-top: 20px;
+        }
+
+        .control-button {
+            flex: 1;
+            padding: 12px 20px;
+            font-size: 1em;
+            border: none;
+            border-radius: 25px;
+            cursor: pointer;
+            font-family: 'Georgia', serif;
+            transition: all 0.3s ease;
+        }
+
+        .next-button {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+
+        .reset-button {
+            background: #f5f5f5;
+            color: #666;
+        }
+
+        .control-button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+        }
+
+        .stats {
+            text-align: center;
+            color: white;
+            margin-top: 20px;
+            font-size: 0.9em;
+            opacity: 0.8;
+        }
+
+        .hearts {
+            position: fixed;
+            pointer-events: none;
+            z-index: 1000;
+        }
+
+        @keyframes float {
+            0% {
+                transform: translateY(100vh) rotate(0deg);
+                opacity: 1;
+            }
+            100% {
+                transform: translateY(-100vh) rotate(360deg);
+                opacity: 0;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="hearts" id="hearts"></div>
+    
+    <div class="container">
+        <div class="header">
+            <h1>❤️ Игра для нас двоих ❤️</h1>
+            <p>День всех влюблённых 2026</p>
+        </div>
+
+        <div id="wheelView">
+            <div class="wheel-container">
+                <div class="arrow">🔻</div>
+                <div class="wheel" id="wheel">
+                    <div class="wheel-center">❤️</div>
+                </div>
+            </div>
+
+            <button class="spin-button" id="spinButton" onclick="spinWheel()">
+                Крутить колесо
+            </button>
+
+            <div class="stats" id="stats">
+                Вопросов осталось: 20 из 20
+            </div>
+        </div>
+
+        <div class="question-card" id="questionCard">
+            <div class="question-number" id="questionNumber"></div>
+            <div class="question-text" id="questionText"></div>
+            <div class="turn-indicator" id="turnIndicator"></div>
+            <div class="controls">
+                <button class="control-button next-button" onclick="nextQuestion()">
+                    Следующий вопрос
+                </button>
+                <button class="control-button reset-button" onclick="resetGame()">
+                    Начать заново
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const questions = [
+            "Как изменилось твое представление об отношениях/любви после знакомства со мной?",
+            "Как ты представляешь меня через 30 лет? А нас?",
+            "Когда ты понял, что я тебя люблю без моих слов об этом?",
+            "Что тебе больше всего нравится в нас, когда мы рядом?",
+            "Если бы я потеряла память, что бы ты рассказал мне о нас, чтобы я все вспомнила?",
+            "Если бы про меня снимали фильм, в каком жанре?",
+            "Какую мою фразу ты бы сделал мемом?",
+            "В какой момент ты понял, что со мной точно не соскучишься?",
+            "Если бы я потерялась в торговом центре, где бы ты стал искать меня в первую очередь?",
+            "Если бы меня нужно было описать тремя словами, чтобы незнакомый человек сразу сложил свое впечатление обо мне, какие бы они были?",
+            "Какой запах ассоциируется со мной?",
+            "Какое мое качество ты хочешь, чтобы унаследовали наши дети?",
+            "Какой секрет из твоего детства ты мне еще не рассказал?",
+            "Мы обменялись телами. Какие действия ты сделаешь в первую очередь?",
+            "Если бы ты писал инструкцию «Как выжить рядом со мной», какие были бы первые три пункта?",
+            "Какое твое любимое воспоминание, связанное с нами?",
+            "В какие моменты ты чувствуешь себя особенно любимым(ой)?",
+            "Что я делаю хуже всего? (тот самый талант, с которым ты просто смирился)",
+            "Что нам никогда нельзя менять в наших отношениях?",
+            "В каком моменте ты понял(а), что я немного... того?"
+        ];
+
+        let remainingQuestions = [...questions];
+        let currentTurn = 1;
+        let currentQuestionIndex = -1;
+
+        function updateStats() {
+            document.getElementById('stats').textContent = 
+                `Вопросов осталось: ${remainingQuestions.length} из ${questions.length}`;
+        }
+
+        function createHeart() {
+            const heart = document.createElement('div');
+            heart.textContent = '❤️';
+            heart.style.position = 'fixed';
+            heart.style.left = Math.random() * 100 + 'vw';
+            heart.style.fontSize = (Math.random() * 20 + 10) + 'px';
+            heart.style.animation = `float ${Math.random() * 3 + 4}s linear`;
+            document.getElementById('hearts').appendChild(heart);
+            
+            setTimeout(() => heart.remove(), 7000);
+        }
+
+        function spinWheel() {
+            if (remainingQuestions.length === 0) {
+                alert('Все вопросы закончились! Нажмите "Начать заново" для новой игры.');
+                return;
+            }
+
+            const wheel = document.getElementById('wheel');
+            const button = document.getElementById('spinButton');
+            
+            button.disabled = true;
+            wheel.classList.add('spinning');
+
+            const heartInterval = setInterval(createHeart, 200);
+
+            setTimeout(() => {
+                wheel.classList.remove('spinning');
+                clearInterval(heartInterval);
+                showQuestion();
+                button.disabled = false;
+            }, 3000);
+        }
+
+        function showQuestion() {
+            if (remainingQuestions.length === 0) return;
+
+            const randomIndex = Math.floor(Math.random() * remainingQuestions.length);
+            const questionText = remainingQuestions[randomIndex];
+
+            remainingQuestions.splice(randomIndex, 1);
+
+            document.getElementById('wheelView').style.display = 'none';
+            document.getElementById('questionCard').classList.add('active');
+            document.getElementById('questionText').textContent = questionText;
+            document.getElementById('questionNumber').textContent = 
+                `Вопрос ${questions.length - remainingQuestions.length} из ${questions.length}`;
+            
+            const turnText = currentTurn === 1 ? 
+                '💙 Очередь первого партнера отвечать' : 
+                '💜 Очередь второго партнера отвечать';
+            document.getElementById('turnIndicator').textContent = turnText;
+
+            currentTurn = currentTurn === 1 ? 2 : 1;
+
+            updateStats();
+        }
+
+        function nextQuestion() {
+            document.getElementById('questionCard').classList.remove('active');
+            document.getElementById('wheelView').style.display = 'block';
+            
+            if (remainingQuestions.length === 0) {
+                setTimeout(() => {
+                    alert('🎉 Поздравляем! Вы ответили на все вопросы! 🎉\n\nТеперь вы знаете друг друга ещё лучше! ❤️');
+                }, 300);
+            }
+        }
+
+        function resetGame() {
+            if (confirm('Вы уверены, что хотите начать игру заново?')) {
+                remainingQuestions = [...questions];
+                currentTurn = 1;
+                document.getElementById('questionCard').classList.remove('active');
+                document.getElementById('wheelView').style.display = 'block';
+                updateStats();
+            }
+        }
+
+        updateStats();
+    </script>
+</body>
+</html>
